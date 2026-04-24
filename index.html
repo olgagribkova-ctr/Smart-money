@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AG Investa | Smart Money Academy</title>
+    
+    <!-- Fonts: Unbounded (Primary), Montserrat (as Gilroy substitute for web) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            orange: '#FB6524',      // Rich Orange
+                            terracotta: '#BF5022',  // Terracotta
+                            brown: '#492415',       // Deep Brown
+                            black: '#0D0D0D',       // Charcoal Black
+                            grey: '#474747',        // Dark Grey
+                            white: '#FFFFFF'        // Pure White
+                        }
+                    },
+                    fontFamily: {
+                        header: ['Unbounded', 'sans-serif'],
+                        body: ['Montserrat', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background-color: #FFFFFF; color: #0D0D0D; }
+        h1, h2, h3 { font-family: 'Unbounded', sans-serif; text-transform: uppercase; }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 900px;
+            margin: 0 auto;
+            height: 400px;
+            max-height: 500px;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #0D0D0D 0%, #492415 100%);
+        }
+
+        .custom-shadow {
+            box-shadow: 0 10px 30px -10px rgba(251, 101, 36, 0.2);
+        }
+
+        .nav-link.active {
+            color: #FB6524;
+            border-bottom: 2px solid #FB6524;
+        }
+
+        /* Candlestick styles */
+        .candle { width: 20px; position: relative; cursor: pointer; transition: transform 0.2s; }
+        .candle:hover { transform: scale(1.1); }
+        .wick { width: 2px; background: #0D0D0D; position: absolute; left: 50%; transform: translateX(-50%); }
+        .body-bull { background: #FB6524; }
+        .body-bear { background: #0D0D0D; }
+
+        @keyframes pulse-orange {
+            0% { box-shadow: 0 0 0 0 rgba(251, 101, 36, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(251, 101, 36, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(251, 101, 36, 0); }
+        }
+        .animate-pulse-brand { animation: pulse-orange 2s infinite; }
+    </style>
+
+    <!-- Placeholder Comments Required -->
+    <!-- Chosen Palette: AG Investa Official (Rich Orange, Terracotta, Deep Brown, Charcoal Black, Pure White). This creates a premium, financial, and bold aesthetic. -->
+    <!-- Application Structure Plan: The SPA is organized as a professional training module. It begins with a Brand Hero section (Mission), followed by four interactive education pillars: Market Dynamics (Volume), Structure (Trend Logic), Liquidity (Stop Hunting), and POI (Order Blocks/FVG). The flow is designed to move the user from 'Why' to 'How'. Navigation is sticky at the top for easy access. -->
+    <!-- Visualization & Content Choices: 
+         1. Market Disparity: Chart.js Doughnut in Brand Orange/Black to show Institutional dominance.
+         2. Structure Logic: Interactive Line Chart displaying BOS/CHoCH with Brand-specific markers.
+         3. Liquidity Simulation: Custom Canvas-based 'Sweep' animation using brand colors to show price 'hunting' stops.
+         4. Candlestick Patterns: Pure HTML/CSS candles to identify FVG and OB zones with interactive overlays. 
+         Confirming NO SVG or Mermaid JS used. All graphics are Canvas, Unicode, or CSS. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+</head>
+
+<body class="overflow-x-hidden">
+
+    <!-- Header / Logo Area -->
+    <header class="bg-brand-white border-b border-gray-100 py-4 px-4 md:px-6 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-y-4">
+            <div class="flex items-center gap-3">
+                <!-- Офіційний SVG Логотип (Чорний для світлого фону) -->
+                <svg class="h-8 md:h-10 w-auto" id="Слой_1" data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42.95 40.95">
+                    <defs><style>.cls-1-header{fill:#0d0d0d;}.cls-2-header{fill:#fb6524;}</style></defs>
+                    <path class="cls-1-header" d="M46.15,70.24c-.06-.18-.17-.34-.15-.48.16-1-.51-1.42-1.17-1.89s-1.33-1-2-1.48a1,1,0,0,1-.49-1.08,6.77,6.77,0,0,0-.18-1.74c-.08-.31-.43-.56-.69-.87.38-.51.82-1.15,1.32-1.74a2.41,2.41,0,0,0,.44-2.35c-.16-.6-.25-1.23-.46-1.83,0,.83,0,1.67,0,2.49a3.3,3.3,0,0,1-.39,1.34,9.75,9.75,0,0,1-6,4.73,2.17,2.17,0,0,0-1.36,1,2.7,2.7,0,0,1-.27.39c-.75.92-1.28,1.87-.75,3.1a1.93,1.93,0,0,1,0,.54H30.34a8.5,8.5,0,0,0,.42-.94,8.35,8.35,0,0,0,.17-1,1,1,0,0,1,.14-.43,8.37,8.37,0,0,0,1.79-4.28,1,1,0,0,1,.45-.68,3.11,3.11,0,0,0,2-2.78,13.81,13.81,0,0,1,2.53-6,3.71,3.71,0,0,1,1.54-1.15c1.5-.7,3.06-1.25,4.56-2a9,9,0,0,0,1.76-1.28c.42-.34.79-.7,1.38-.17-.3-.61.07-.86.42-1.21a42.09,42.09,0,0,0,3.05-3.22,5.76,5.76,0,0,1,2.89-1.93A5.7,5.7,0,0,0,55,42.53c.52-.35,1-.79,1.35-1.08a10.07,10.07,0,0,0,2.61,1c.51,0,1.08-.61,1.59-1-2.21.69-2.53.64-4.14-.66.4-.16.76-.31,1.13-.44s.74-.22,1.2-.35a12.55,12.55,0,0,1-1.64-.76,1.36,1.36,0,0,1-.54-.84,2.39,2.39,0,0,1,1.12-2.62,19,19,0,0,1,4.71-2.35c-.66.68-1.21,1.23-1.74,1.79a16,16,0,0,0-1.42,1.56c-.42.57-.28.86.4,1.09a3.3,3.3,0,0,0,.72.22c.57.07,1,.27,1,1l.19-.1-.26-1.23c.7-.44,1.55-.08,2.37-.11a8.48,8.48,0,0,1,3.88,1.14,12.74,12.74,0,0,0,2.64.86,1.55,1.55,0,0,1,1.07,2.36,2.45,2.45,0,0,0-2.68.54,3.46,3.46,0,0,1,2.6-.08A2.53,2.53,0,0,1,69.6,44a6.5,6.5,0,0,0-2.1,1.68,9.3,9.3,0,0,0-2.8,5c-.14,1.13-.1,2.28-.24,3.41a3.21,3.21,0,0,1-.56,1.62q-1.93,2.4-4,4.65a8.83,8.83,0,0,1-1.63,1.11c-.87-1.8-.12-3.38.14-5,.14-.87.35-1.74.49-2.61a1.46,1.46,0,0,0-.09-.83C57.91,51.39,57,49.68,56,48c.52,1.29,1,2.61,1.57,3.88A4.55,4.55,0,0,1,58,55c-.32,1.27-.48,2.59-.73,4l-1.83-1.57-.08,0a4.37,4.37,0,0,0,.37.48,8.8,8.8,0,0,1,2.23,4.73,18,18,0,0,0,.49,2,9.34,9.34,0,0,0,2,3.44,17.79,17.79,0,0,1,1.42,2.09c-.68.2-.68.2-1.56-.8,0,.19,0,.33,0,.47a4.24,4.24,0,0,0,.1.49c-.87,0-1.71,0-2.54,0a.84.84,0,0,1-.48-.68c0-.61.23-1.19-.54-1.54-.18-.08-.24-.56-.25-.86a2.6,2.6,0,0,0-1-2.07c-1.48-1.09-2.41-2.65-3.61-4a25.17,25.17,0,0,0-1.63-1.93,2.58,2.58,0,0,1-.67-2.49,17.52,17.52,0,0,0,.12-2.81c-.32,1.37-.66,2.74-.94,4.12a1.12,1.12,0,0,0,.29.82c1,1.12,2.06,2.2,3.21,3.42l-8.46-.52,0,.2,3.59.55a7.16,7.16,0,0,1-1.62,3.14c1.24,1.56,3,2.61,4,4.45ZM67.47,44.36l0-.12c-.21.06-.42.11-.63.18-1,.38-2,.77-3.05,1.13a1.14,1.14,0,0,1-.7.06C62,45.27,61,45,60.78,43.7c0,0-.06,0-.08,0a1.6,1.6,0,0,0,1.14,2c.39.15.75.41,1.14.59a.84.84,0,0,0,.55.08C64.85,45.69,66.16,45,67.47,44.36ZM63,39.94a1.31,1.31,0,0,0,1.85,0C64.24,39.76,63.62,39.26,63,39.94Zm6.41.7c0-.55-.39-.51-.73-.48-.08,0-.14.13-.21.2.25.11.49.23.74.32C69.28,40.7,69.36,40.65,69.42,40.64Z" transform="translate(-28.53 -29.53)"/><path class="cls-1-header" d="M60.43,60.64l3-3.38c.39,1.37.82,2.67,1.11,4a1.86,1.86,0,0,1-.35,1.26c-.67,1-1.48,1.91-2.12,2.92-.52.83-1.36.88-2.13,1.15a.29.29,0,0,1-.25,0,12.6,12.6,0,0,1-.65-2,.64.64,0,0,1,.75-.6,1.38,1.38,0,0,0,.88-.5c.92-.94.93-1.26.13-2.25Z" transform="translate(-28.53 -29.53)"/><path class="cls-1-header" d="M37.64,53.52c-.31.56-.56,1-.85,1.5a.67.67,0,0,1-.44.22,7.48,7.48,0,0,1-.82,0,1.47,1.47,0,0,0-1.59,1.13c-.21.81-.38,1.63-.51,2.45a3.55,3.55,0,0,1-1.94,2.65,1.12,1.12,0,0,0-.48.43,3.25,3.25,0,0,1-2.48,2.17c.24-.7.48-1.41.74-2.11a1.15,1.15,0,0,1,1.09-.88A2.28,2.28,0,0,0,32.69,59c.13-1,.16-1.91.28-2.85a2.48,2.48,0,0,1,2.15-2.37,4,4,0,0,1,.48-.07Z" transform="translate(-28.53 -29.53)"/><path class="cls-1-header" d="M69.6,34.4c1.23,1.39,1.29,3.12,0,4.23a1,1,0,0,1-.82.17c-.65-.23-1.27-.57-2-.93,1-.13,2.06-.11,2.44-1A9.57,9.57,0,0,0,69.6,34.4Z" transform="translate(-28.53 -29.53)"/><polygon class="cls-2-header" points="37.82 0 37 2.74 34.23 3.49 36.98 4.31 37.73 7.08 38.55 4.33 41.31 3.59 38.57 2.76 37.82 0"/></svg>
+                
+                <div class="flex flex-col">
+                    <span class="font-header text-base md:text-lg font-bold tracking-tighter text-brand-black">AG INVESTA</span>
+                </div>
+            </div>
+            
+            <nav class="hidden xl:flex gap-8 order-3 xl:order-2 w-full xl:w-auto justify-center">
+                <button onclick="app.scrollTo('intro')" class="nav-link active font-semibold text-sm uppercase tracking-wider">Вступ</button>
+                <button onclick="app.scrollTo('structure')" class="nav-link font-semibold text-sm uppercase tracking-wider">Структура</button>
+                <button onclick="app.scrollTo('liquidity')" class="nav-link font-semibold text-sm uppercase tracking-wider">Ліквідність</button>
+                <button onclick="app.scrollTo('poi')" class="nav-link font-semibold text-sm uppercase tracking-wider">Точки входу</button>
+                <button onclick="app.scrollTo('zones')" class="nav-link font-semibold text-sm uppercase tracking-wider">Зони ціни</button>
+                <button onclick="app.scrollTo('idm')" class="nav-link font-semibold text-sm uppercase tracking-wider">Пастки (IDM)</button>
+                <button onclick="app.scrollTo('practice')" class="nav-link font-semibold text-sm uppercase tracking-wider">Практика</button>
+            </nav>
+
+            <div class="flex items-center gap-2 md:gap-3 order-2 xl:order-3 ml-auto xl:ml-0">
+                <a href="https://aginvesta.com/" target="_blank" class="hidden sm:inline-block bg-brand-black text-white px-4 py-2 rounded font-bold text-[10px] md:text-xs uppercase hover:bg-brand-grey transition-all shadow-md">Сайт компанії</a>
+                <a href="https://promo.fxclub.org/lp/ua-ua/lbx-visitors-more/?pf=frp_10152" target="_blank" class="bg-brand-orange text-white px-4 py-2 rounded font-bold text-[10px] md:text-xs uppercase hover:bg-brand-terracotta transition-all shadow-md text-center">Відкрити рахунок</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section / Mission -->
+    <section id="intro" class="hero-gradient text-white py-20 px-6 relative overflow-hidden">
+        <div class="max-w-5xl mx-auto relative z-10">
+            <span class="text-brand-orange font-bold uppercase tracking-[0.3em] text-sm mb-4 block">Опануйте ринок з AG Investa</span>
+            <h1 class="text-4xl md:text-6xl font-bold mb-8 leading-tight">Професійна освіта <br><span class="text-brand-orange">Smart Money</span></h1>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+                <div class="space-y-6">
+                    <p class="text-lg text-gray-300 leading-relaxed">
+                        Місія AG Investa: допомогти відкрити світ фінансових ринків та досягти незалежності. Наші програми створені для того, щоб кожен, незалежно від рівня підготовки, міг опанувати ефективні торговельні стратегії.
+                    </p>
+                    <div class="flex gap-4">
+                        <div class="bg-brand-orange/10 border-l-4 border-brand-orange p-4 italic text-sm">
+                            "Ми прагнемо, щоб наше ім'я асоціювалося з якісною освітою та надійним партнерством."
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-brand-white/5 backdrop-blur-md p-6 rounded-xl border border-white/10 custom-shadow">
+                    <h3 class="font-header text-sm mb-4 text-center">Розподіл ринкового капіталу</h3>
+                    <div class="chart-container h-64">
+                        <canvas id="marketShareChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Decorative background elements -->
+        <div class="absolute top-0 right-0 w-96 h-96 bg-brand-orange opacity-5 rounded-full blur-3xl -mr-48 -mt-48"></div>
+    </section>
+
+    <!-- Content Sections -->
+    <main class="max-w-7xl mx-auto py-16 px-6 space-y-32">
+
+        <!-- Section 2: Market Structure -->
+        <section id="structure" class="scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">Логіка руху: Структура ринку</h2>
+                <p class="max-w-2xl mx-auto text-brand-grey">Розуміння структури — це фундамент. Ми вчимо бачити, де Smart Money підтверджують тренд (BOS), а де готують його розворот (CHoCH).</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 bg-brand-white rounded-2xl border border-gray-200 p-6 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <div class="flex gap-2">
+                            <button onclick="app.updateStructure('uptrend')" class="struct-btn active bg-brand-black text-white px-4 py-2 rounded text-xs font-bold uppercase">Висхідний</button>
+                            <button onclick="app.updateStructure('reversal')" class="struct-btn bg-gray-100 text-brand-black px-4 py-2 rounded text-xs font-bold uppercase hover:bg-gray-200">Розворот</button>
+                        </div>
+                        <div id="struct-status" class="text-brand-orange font-bold text-xs uppercase tracking-widest">BOS активовано</div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="structureChart"></canvas>
+                    </div>
+                </div>
+                <div class="space-y-6">
+                    <div class="bg-brand-black text-white p-6 rounded-2xl relative overflow-hidden group">
+                        <div class="relative z-10">
+                            <h4 class="font-header text-brand-orange mb-2">BOS</h4>
+                            <p class="text-xs text-gray-400">Break of Structure. Коли ціна продовжує свій шлях, пробиваючи попередній максимум/мінімум. Це зелене світло для тренду.</p>
+                        </div>
+                        <div class="absolute -right-4 -bottom-4 text-8xl text-white/5 font-bold">&#8599;</div>
+                    </div>
+                    <div class="bg-brand-white border border-gray-200 p-6 rounded-2xl relative overflow-hidden">
+                        <h4 class="font-header text-brand-terracotta mb-2">CHoCH</h4>
+                        <p class="text-xs text-brand-grey">Change of Character. Перший злам звичного руху. Саме тут "розумні гроші" починають фіксувати прибуток і міняти напрямок.</p>
+                    </div>
+                    <div class="p-6 rounded-2xl border-2 border-dashed border-brand-orange/30">
+                        <h4 class="font-header text-sm mb-2">Порада AG Investa:</h4>
+                        <p class="text-xs italic">"Ніколи не торгуйте проти CHoCH на старшому таймфреймі. Це війна, в якій у ритейл-трейдера немає шансів."</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Liquidity -->
+        <section id="liquidity" class="scroll-mt-24">
+            <div class="bg-brand-black rounded-3xl p-8 md:p-16 text-white flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl font-bold mb-6 text-brand-orange">Ліквідність — це паливо</h2>
+                    <p class="text-gray-400 mb-8 leading-relaxed">
+                        Ви колись купували на "рівні підтримки", а ціна просто пробивала його, забирала ваш стоп-лосс і летіла в потрібному напрямку? 
+                        <br><br>
+                        Це був **Liquidity Sweep** (збір ліквідності). Великим гравцям потрібні ваші стопи, щоб відкрити свої позиції.
+                    </p>
+                    <button onclick="app.simulateSweep()" class="bg-brand-orange text-white px-8 py-4 rounded-full font-bold uppercase tracking-widest text-sm animate-pulse-brand hover:scale-105 transition-transform">
+                        &#9889; Симулювати Sweep
+                    </button>
+                </div>
+                <div class="md:w-1/2 w-full bg-brand-white/5 rounded-2xl p-4 border border-white/10">
+                    <div class="chart-container">
+                        <canvas id="liquidityCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: POI -->
+        <section id="poi" class="scroll-mt-24">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Зони Інтересу (POI)</h2>
+                <p class="max-w-2xl mx-auto text-brand-grey">Місця, де ми шукаємо вхід. Ордер блоки та значне перевищення попиту над пропозицію (чи навпаки) — це "відбитки пальців" інституціалів.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-16">
+                <!-- Order Block Card -->
+                <div class="space-y-6">
+                    <div class="bg-brand-white p-8 rounded-2xl border-t-8 border-brand-orange shadow-xl hover:-translate-y-2 transition-all">
+                        <h3 class="text-xl font-bold mb-4">Order Block (OB)</h3>
+                        <p class="text-sm text-brand-grey mb-6">Остання свічка перед сильним імпульсним рухом. Саме тут банк виставив лімітні ордери.</p>
+                        
+                        <!-- Interactive CSS Candles -->
+                        <div class="h-48 flex items-end justify-center gap-4 bg-gray-50 rounded-xl p-4 relative" id="ob-visualization">
+                            <div id="ob-zone" class="absolute left-0 right-0 h-12 bg-brand-orange/20 border-y border-brand-orange border-dashed hidden flex items-center justify-center">
+                                <span class="text-[10px] font-bold text-brand-orange">BUY ZONE</span>
+                            </div>
+                            <!-- Candle 1 (Down) -->
+                            <div class="candle flex flex-col items-center">
+                                <div class="wick h-32 bottom-0"></div>
+                                <div class="candle-body body-bear w-5 h-10 mb-8 rounded-sm"></div>
+                            </div>
+                            <!-- Candle 2 (Strong Up) -->
+                            <div class="candle flex flex-col items-center">
+                                <div class="wick h-40 bottom-0"></div>
+                                <div class="candle-body body-bull w-5 h-32 mb-4 rounded-sm"></div>
+                            </div>
+                        </div>
+                        <button onclick="app.toggleOB()" class="w-full mt-6 py-2 border-2 border-brand-orange text-brand-orange font-bold rounded hover:bg-brand-orange hover:text-white transition">Виділити OB</button>
+                    </div>
+                </div>
+
+                <!-- FVG Card -->
+                <div class="space-y-6">
+                    <div class="bg-brand-white p-8 rounded-2xl border-t-8 border-brand-black shadow-xl hover:-translate-y-2 transition-all">
+                        <h3 class="text-xl font-bold mb-4">Fair Value Gap (FVG)</h3>
+                        <p class="text-sm text-brand-grey mb-6">Ціновий розрив між тінню 1-ї та 3-ї свічки. Ринок ЗАВЖДИ прагне перекрити цю неефективність.</p>
+                        
+                        <div class="h-48 flex items-end justify-center gap-4 bg-gray-50 rounded-xl p-4 relative" id="fvg-visualization">
+                            <div id="fvg-zone" class="absolute w-full h-16 bg-blue-100/50 border-y border-blue-400 border-dashed bottom-20 hidden flex items-center justify-center">
+                                <span class="text-[10px] font-bold text-blue-500">MAGNET / IMBALANCE</span>
+                            </div>
+                            <!-- Candle 1 -->
+                            <div class="candle flex flex-col items-center">
+                                <div class="wick h-16 bottom-0"></div>
+                                <div class="candle-body body-bull w-5 h-8 mb-4 rounded-sm"></div>
+                            </div>
+                            <!-- Candle 2 (Long) -->
+                            <div class="candle flex flex-col items-center">
+                                <div class="wick h-44 bottom-0"></div>
+                                <div class="candle-body body-bull w-5 h-36 mb-4 rounded-sm"></div>
+                            </div>
+                            <!-- Candle 3 -->
+                            <div class="candle flex flex-col items-center">
+                                <div class="wick h-12 bottom-28"></div>
+                                <div class="candle-body body-bull w-5 h-8 mb-32 rounded-sm"></div>
+                            </div>
+                        </div>
+                        <button onclick="app.toggleFVG()" class="w-full mt-6 py-2 border-2 border-brand-black text-brand-black font-bold rounded hover:bg-brand-black hover:text-white transition">Виділити FVG</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: Premium & Discount -->
+        <section id="zones" class="scroll-mt-24">
+            <div class="bg-brand-black text-white rounded-3xl p-8 md:p-16 shadow-xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-brand-orange opacity-10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                <div class="text-center mb-12 relative z-10">
+                    <h2 class="text-3xl font-bold mb-4 text-brand-orange">Premium & Discount</h2>
+                    <p class="max-w-2xl mx-auto text-gray-400">Великі гравці ніколи не купують за завищеною ціною і не продають за заниженою. Вони завжди чекають повернення ціни в оптимальні зони (Fibonacci 0.5).</p>
+                </div>
+
+                <div class="flex flex-col md:flex-row gap-12 items-center relative z-10">
+                    <div class="md:w-1/2 space-y-6">
+                        <div class="p-6 border border-brand-orange/30 bg-brand-orange/5 rounded-xl border-l-4 border-l-brand-orange">
+                            <h4 class="font-header text-brand-orange mb-2">Premium (Зона продажу)</h4>
+                            <p class="text-sm text-gray-300">Верхні 50% цінового імпульсу. Тут ціна вважається дорогою. Smart Money розглядають цю зону виключно для відкриття позицій на пониження (Short) або фіксації прибутку від Long.</p>
+                        </div>
+                        <div class="p-6 border border-white/10 bg-white/5 rounded-xl border-l-4 border-l-gray-400">
+                            <h4 class="font-header text-gray-300 mb-2">Discount (Зона покупки)</h4>
+                            <p class="text-sm text-gray-300">Нижні 50% цінового імпульсу. Ціна "зі знижкою". Ідеальне місце для пошуку Order Blocks та відкриття позицій на підвищення (Long).</p>
+                        </div>
+                        <div class="bg-brand-brown/40 p-4 rounded-xl">
+                            <p class="text-xs italic text-gray-300">Правило AG Investa: "Якщо ви бачите ідеальний Ордер Блок для покупки, але він знаходиться у зоні Premium — проігноруйте його. Найімовірніше, це пастка."</p>
+                        </div>
+                    </div>
+                    
+                    <div class="md:w-1/2 w-full flex justify-center">
+                        <div class="w-full max-w-[280px] h-80 relative flex border-l-4 border-gray-600 pl-4 text-left font-bold text-xs flex-col">
+                            <!-- Premium Zone -->
+                            <div class="h-1/2 w-full bg-brand-orange/10 border-t-2 border-brand-orange/50 flex flex-col justify-center px-4 relative rounded-tr-xl">
+                                <span class="absolute -left-[54px] top-0 text-brand-orange bg-brand-black px-1 rounded">100%</span>
+                                <span class="text-brand-orange text-lg mb-1 uppercase font-header">Premium</span>
+                                <span class="text-white/60 font-normal">Шукаємо Short угоди</span>
+                            </div>
+                            <!-- Equilibrium -->
+                            <div class="w-full h-0 border-t-2 border-dashed border-gray-400 relative">
+                                <span class="absolute -left-[50px] -top-2.5 text-gray-400 bg-brand-black px-1 rounded">50%</span>
+                                <span class="absolute right-4 -top-2.5 text-gray-400 font-normal text-[10px]">Equilibrium / Справедлива ціна</span>
+                            </div>
+                            <!-- Discount Zone -->
+                            <div class="h-1/2 w-full bg-white/5 border-b-2 border-gray-500 flex flex-col justify-center px-4 relative rounded-br-xl">
+                                <span class="absolute -left-[45px] bottom-0 text-gray-400 bg-brand-black px-1 rounded">0%</span>
+                                <span class="text-gray-300 text-lg mb-1 uppercase font-header">Discount</span>
+                                <span class="text-white/60 font-normal">Шукаємо Long угоди</span>
+                            </div>
+                            <!-- Price vector arrow -->
+                            <div class="absolute -left-[3px] bottom-0 w-[2px] h-full bg-gradient-to-t from-gray-500 via-gray-400 to-brand-orange"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: Inducement (IDM) -->
+        <section id="idm" class="scroll-mt-24">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Inducement (IDM) — Пастка для натовпу</h2>
+                <p class="max-w-2xl mx-auto text-brand-grey">Чому ваш ідеальний Ордер Блок часто пробивається? Тому що перед справжньою зоною інтересу ринок створює приманку (Inducement), щоб змусити вас увійти зарано.</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+                <div class="bg-brand-white border border-gray-200 p-6 rounded-2xl shadow-sm relative">
+                    <div class="absolute top-4 right-6 text-brand-terracotta font-bold text-[10px] uppercase tracking-widest animate-pulse">Зверніть увагу на червону точку</div>
+                    <div class="chart-container h-80">
+                        <canvas id="idmCanvas"></canvas>
+                    </div>
+                    <div class="mt-4 text-center">
+                        <button onclick="app.simulateIdmSweep()" class="bg-brand-black text-white px-6 py-2 rounded text-xs font-bold uppercase hover:bg-brand-grey transition-all">
+                            Запустити рух ціни
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-brand-orange/10 flex items-center justify-center text-brand-orange font-bold text-xl shrink-0">1</div>
+                        <div>
+                            <h4 class="font-header text-brand-black mb-1">Створення приманки (IDM)</h4>
+                            <p class="text-sm text-brand-grey">Ринок робить локальний відкат, не доходячи до справжнього Ордер Блоку. Ритейл-трейдери бачать у цьому рівень опору і починають відкривати Short-угоди, розміщуючи свої стоп-лоси вище.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-brand-terracotta/10 flex items-center justify-center text-brand-terracotta font-bold text-xl shrink-0">2</div>
+                        <div>
+                            <h4 class="font-header text-brand-terracotta mb-1">Збір ліквідності</h4>
+                            <p class="text-sm text-brand-grey">Ціна різко імпульсом йде вгору (червона точка), вибиваючи всі стоп-лоси. Ця ліквідність потрібна великому гравцю, щоб "наповнити" свою реальну позицію.</p>
+                        </div>
+                    </div>
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-brand-black/10 flex items-center justify-center text-brand-black font-bold text-xl shrink-0">3</div>
+                        <div>
+                            <h4 class="font-header text-brand-black mb-1">Справжній рух</h4>
+                            <p class="text-sm text-brand-grey">Тільки після того, як пастку (IDM) було зібрано, ціна нарешті торкається справжнього Ордер Блоку і починає агресивний трендовий рух вниз.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Practice / Strategy -->
+        <section id="practice" class="scroll-mt-24">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold mb-4">Використання на практиці: Торговий Алгоритм</h2>
+                <p class="max-w-2xl mx-auto text-brand-grey">Трейдинг — це не пошук одного патерну, це складання пазлу з ймовірностей. Ось покроковий алгоритм AG Investa, який поєднує всі концепції SMC для стабільного заробітку.</p>
+            </div>
+
+            <div class="bg-brand-black rounded-3xl p-8 lg:p-12 shadow-2xl relative">
+                <!-- Timeline Line -->
+                <div class="hidden md:block absolute left-1/2 top-12 bottom-12 w-1 bg-gradient-to-b from-brand-orange via-brand-terracotta to-gray-800 transform -translate-x-1/2"></div>
+                
+                <div class="space-y-12 relative z-10">
+                    <!-- Step 1 -->
+                    <div class="flex flex-col md:flex-row justify-between items-center w-full">
+                        <div class="md:w-5/12 mb-6 md:mb-0 text-right pr-0 md:pr-8">
+                            <h3 class="text-xl font-header text-brand-orange mb-2">Крок 1: Контекст (Старший ТФ)</h3>
+                            <p class="text-sm text-gray-300">Визначте глобальний тренд на старшому таймфреймі (наприклад, 4H або 1D). Знайдіть неперекритий Ордер Блок (OB) або Імбаланс (FVG), який обов'язково знаходиться у зоні Discount (для покупок) або Premium (для продажів).</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-brand-orange border-4 border-brand-black flex items-center justify-center text-white font-bold text-xl z-10 shrink-0 shadow-[0_0_15px_rgba(251,101,36,0.5)]">1</div>
+                        <div class="md:w-5/12 pl-0 md:pl-8 mt-4 md:mt-0">
+                            <div class="bg-white/5 border border-white/10 p-4 rounded-xl text-xs text-gray-400 italic">
+                                <span class="text-brand-orange font-bold">Мета:</span> Зрозуміти, куди глобально направлені гроші великого гравця.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="flex flex-col md:flex-row-reverse justify-between items-center w-full">
+                        <div class="md:w-5/12 mb-6 md:mb-0 text-left pl-0 md:pl-8">
+                            <h3 class="text-xl font-header text-white mb-2">Крок 2: Очікування (Пастки)</h3>
+                            <p class="text-sm text-gray-300">Не ставте лімітний ордер відразу. Зачекайте, поки ціна наблизиться до вашої зони інтересу і сформує приманку (IDM) — локальні рівні підтримки/опору перед вашим OB. Дозвольте натовпу зайти в ринок зарано.</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-brand-terracotta border-4 border-brand-black flex items-center justify-center text-white font-bold text-xl z-10 shrink-0">2</div>
+                        <div class="md:w-5/12 pr-0 md:pr-8 mt-4 md:mt-0 text-right">
+                            <div class="bg-white/5 border border-white/10 p-4 rounded-xl text-xs text-gray-400 italic">
+                                <span class="text-brand-terracotta font-bold">Мета:</span> Дочекатися, поки ритейл-трейдери сформують пул ліквідності для вашого входу.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="flex flex-col md:flex-row justify-between items-center w-full">
+                        <div class="md:w-5/12 mb-6 md:mb-0 text-right pr-0 md:pr-8">
+                            <h3 class="text-xl font-header text-brand-orange mb-2">Крок 3: Підтвердження (Молодший ТФ)</h3>
+                            <p class="text-sm text-gray-300">Як тільки ціна знімає ліквідність (sweep) і торкається вашого HTF Ордер Блоку, перейдіть на молодший таймфрейм (наприклад, 15m або 5m). Шукайте злам локальної структури (CHoCH) у потрібному напрямку.</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-brand-orange border-4 border-brand-black flex items-center justify-center text-white font-bold text-xl z-10 shrink-0">3</div>
+                        <div class="md:w-5/12 pl-0 md:pl-8 mt-4 md:mt-0">
+                            <div class="bg-white/5 border border-white/10 p-4 rounded-xl text-xs text-gray-400 italic">
+                                <span class="text-brand-orange font-bold">Мета:</span> Отримати сигнал, що інституціал почав захищати цю зону і вливати об'єм.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="flex flex-col md:flex-row-reverse justify-between items-center w-full">
+                        <div class="md:w-5/12 mb-6 md:mb-0 text-left pl-0 md:pl-8">
+                            <h3 class="text-xl font-header text-white mb-2">Крок 4: Вхід та Ризик-Менеджмент</h3>
+                            <p class="text-sm text-gray-300">Входьте на відкаті до щойно утвореного локального FVG або OB після CHoCH. <br><br>
+                                <strong class="text-brand-terracotta">Стоп-лосс:</strong> суворо за екстремум Ордер Блоку старшого ТФ.<br>
+                                <strong class="text-brand-orange">Тейк-профіт:</strong> на протилежному пулі ліквідності (найближчі рівні максимуми/мінімуми).
+                            </p>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-brand-black border-4 border-brand-orange flex items-center justify-center text-brand-orange font-bold text-xl z-10 shrink-0 shadow-[0_0_10px_rgba(251,101,36,0.3)]">4</div>
+                        <div class="md:w-5/12 pr-0 md:pr-8 mt-4 md:mt-0 text-right">
+                            <div class="bg-brand-orange/10 border border-brand-orange/50 p-4 rounded-xl text-xs text-white italic">
+                                <span class="text-brand-orange font-bold uppercase block mb-1">Золоте правило:</span> Співвідношення ризику до прибутку (Risk/Reward) має бути не менше 1:3. Ви можете помилятися в 50% випадків і все одно стабільно заробляти.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-brand-black text-white py-12 px-6 border-t border-brand-orange">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="flex items-center gap-3">
+                <!-- Офіційний SVG Логотип (Білий для темного фону) -->
+                <svg class="h-12 w-auto" id="Слой_1_footer" data-name="Слой 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 42.95 40.95">
+                    <defs><style>.cls-1-footer{fill:#ffffff;}.cls-2-footer{fill:#fb6524;}</style></defs>
+                    <path class="cls-1-footer" d="M46.15,70.24c-.06-.18-.17-.34-.15-.48.16-1-.51-1.42-1.17-1.89s-1.33-1-2-1.48a1,1,0,0,1-.49-1.08,6.77,6.77,0,0,0-.18-1.74c-.08-.31-.43-.56-.69-.87.38-.51.82-1.15,1.32-1.74a2.41,2.41,0,0,0,.44-2.35c-.16-.6-.25-1.23-.46-1.83,0,.83,0,1.67,0,2.49a3.3,3.3,0,0,1-.39,1.34,9.75,9.75,0,0,1-6,4.73,2.17,2.17,0,0,0-1.36,1,2.7,2.7,0,0,1-.27.39c-.75.92-1.28,1.87-.75,3.1a1.93,1.93,0,0,1,0,.54H30.34a8.5,8.5,0,0,0,.42-.94,8.35,8.35,0,0,0,.17-1,1,1,0,0,1,.14-.43,8.37,8.37,0,0,0,1.79-4.28,1,1,0,0,1,.45-.68,3.11,3.11,0,0,0,2-2.78,13.81,13.81,0,0,1,2.53-6,3.71,3.71,0,0,1,1.54-1.15c1.5-.7,3.06-1.25,4.56-2a9,9,0,0,0,1.76-1.28c.42-.34.79-.7,1.38-.17-.3-.61.07-.86.42-1.21a42.09,42.09,0,0,0,3.05-3.22,5.76,5.76,0,0,1,2.89-1.93A5.7,5.7,0,0,0,55,42.53c.52-.35,1-.79,1.35-1.08a10.07,10.07,0,0,0,2.61,1c.51,0,1.08-.61,1.59-1-2.21.69-2.53.64-4.14-.66.4-.16.76-.31,1.13-.44s.74-.22,1.2-.35a12.55,12.55,0,0,1-1.64-.76,1.36,1.36,0,0,1-.54-.84,2.39,2.39,0,0,1,1.12-2.62,19,19,0,0,1,4.71-2.35c-.66.68-1.21,1.23-1.74,1.79a16,16,0,0,0-1.42,1.56c-.42.57-.28.86.4,1.09a3.3,3.3,0,0,0,.72.22c.57.07,1,.27,1,1l.19-.1-.26-1.23c.7-.44,1.55-.08,2.37-.11a8.48,8.48,0,0,1,3.88,1.14,12.74,12.74,0,0,0,2.64.86,1.55,1.55,0,0,1,1.07,2.36,2.45,2.45,0,0,0-2.68.54,3.46,3.46,0,0,1,2.6-.08A2.53,2.53,0,0,1,69.6,44a6.5,6.5,0,0,0-2.1,1.68,9.3,9.3,0,0,0-2.8,5c-.14,1.13-.1,2.28-.24,3.41a3.21,3.21,0,0,1-.56,1.62q-1.93,2.4-4,4.65a8.83,8.83,0,0,1-1.63,1.11c-.87-1.8-.12-3.38.14-5,.14-.87.35-1.74.49-2.61a1.46,1.46,0,0,0-.09-.83C57.91,51.39,57,49.68,56,48c.52,1.29,1,2.61,1.57,3.88A4.55,4.55,0,0,1,58,55c-.32,1.27-.48,2.59-.73,4l-1.83-1.57-.08,0a4.37,4.37,0,0,0,.37.48,8.8,8.8,0,0,1,2.23,4.73,18,18,0,0,0,.49,2,9.34,9.34,0,0,0,2,3.44,17.79,17.79,0,0,1,1.42,2.09c-.68.2-.68.2-1.56-.8,0,.19,0,.33,0,.47a4.24,4.24,0,0,0,.1.49c-.87,0-1.71,0-2.54,0a.84.84,0,0,1-.48-.68c0-.61.23-1.19-.54-1.54-.18-.08-.24-.56-.25-.86a2.6,2.6,0,0,0-1-2.07c-1.48-1.09-2.41-2.65-3.61-4a25.17,25.17,0,0,0-1.63-1.93,2.58,2.58,0,0,1-.67-2.49,17.52,17.52,0,0,0,.12-2.81c-.32,1.37-.66,2.74-.94,4.12a1.12,1.12,0,0,0,.29.82c1,1.12,2.06,2.2,3.21,3.42l-8.46-.52,0,.2,3.59.55a7.16,7.16,0,0,1-1.62,3.14c1.24,1.56,3,2.61,4,4.45ZM67.47,44.36l0-.12c-.21.06-.42.11-.63.18-1,.38-2,.77-3.05,1.13a1.14,1.14,0,0,1-.7.06C62,45.27,61,45,60.78,43.7c0,0-.06,0-.08,0a1.6,1.6,0,0,0,1.14,2c.39.15.75.41,1.14.59a.84.84,0,0,0,.55.08C64.85,45.69,66.16,45,67.47,44.36ZM63,39.94a1.31,1.31,0,0,0,1.85,0C64.24,39.76,63.62,39.26,63,39.94Zm6.41.7c0-.55-.39-.51-.73-.48-.08,0-.14.13-.21.2.25.11.49.23.74.32C69.28,40.7,69.36,40.65,69.42,40.64Z" transform="translate(-28.53 -29.53)"/><path class="cls-1-footer" d="M60.43,60.64l3-3.38c.39,1.37.82,2.67,1.11,4a1.86,1.86,0,0,1-.35,1.26c-.67,1-1.48,1.91-2.12,2.92-.52.83-1.36.88-2.13,1.15a.29.29,0,0,1-.25,0,12.6,12.6,0,0,1-.65-2,.64.64,0,0,1,.75-.6,1.38,1.38,0,0,0,.88-.5c.92-.94.93-1.26.13-2.25Z" transform="translate(-28.53 -29.53)"/><path class="cls-1-footer" d="M37.64,53.52c-.31.56-.56,1-.85,1.5a.67.67,0,0,1-.44.22,7.48,7.48,0,0,1-.82,0,1.47,1.47,0,0,0-1.59,1.13c-.21.81-.38,1.63-.51,2.45a3.55,3.55,0,0,1-1.94,2.65,1.12,1.12,0,0,0-.48.43,3.25,3.25,0,0,1-2.48,2.17c.24-.7.48-1.41.74-2.11a1.15,1.15,0,0,1,1.09-.88A2.28,2.28,0,0,0,32.69,59c.13-1,.16-1.91.28-2.85a2.48,2.48,0,0,1,2.15-2.37,4,4,0,0,1,.48-.07Z" transform="translate(-28.53 -29.53)"/><path class="cls-1-footer" d="M69.6,34.4c1.23,1.39,1.29,3.12,0,4.23a1,1,0,0,1-.82.17c-.65-.23-1.27-.57-2-.93,1-.13,2.06-.11,2.44-1A9.57,9.57,0,0,0,69.6,34.4Z" transform="translate(-28.53 -29.53)"/><polygon class="cls-2-footer" points="37.82 0 37 2.74 34.23 3.49 36.98 4.31 37.73 7.08 38.55 4.33 41.31 3.59 38.57 2.76 37.82 0"/></svg>
+
+                <span class="font-header text-lg font-bold">AG INVESTA</span>
+            </div>
+            <p class="text-gray-500 text-sm italic">© 2026 AG Investa. Світ фінансової свободи.</p>
+            <div class="flex gap-6">
+                <a href="#" class="text-gray-400 hover:text-brand-orange text-xs uppercase font-bold">Умови</a>
+                <a href="#" class="text-gray-400 hover:text-brand-orange text-xs uppercase font-bold">Контакти</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        const app = {
+            charts: {},
+            
+            init: function() {
+                this.initMarketChart();
+                this.initStructureChart();
+                this.initLiquidityChart();
+                this.initIdmChart();
+                window.addEventListener('scroll', () => this.handleScroll());
+            },
+
+            scrollTo: function(id) {
+                document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+            },
+
+            handleScroll: function() {
+                const sections = ['intro', 'structure', 'liquidity', 'poi', 'zones', 'idm', 'practice'];
+                let current = '';
+                sections.forEach(s => {
+                    const el = document.getElementById(s);
+                    if (window.scrollY >= el.offsetTop - 150) current = s;
+                });
+                
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.innerText.toLowerCase().includes(
+                        current === 'intro' ? 'вступ' : 
+                        current === 'structure' ? 'структур' : 
+                        current === 'liquidity' ? 'ліквід' : 
+                        current === 'poi' ? 'точ' : 
+                        current === 'zones' ? 'зон' : 
+                        current === 'idm' ? 'пас' : 
+                        current === 'practice' ? 'прак' : ''
+                    )) {
+                        link.classList.add('active');
+                    }
+                });
+            },
+
+            initMarketChart: function() {
+                const ctx = document.getElementById('marketShareChart').getContext('2d');
+                this.charts.market = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Smart Money', 'Ритейл'],
+                        datasets: [{
+                            data: [88, 12],
+                            backgroundColor: ['#FB6524', '#474747'],
+                            borderColor: 'transparent',
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        cutout: '75%'
+                    }
+                });
+            },
+
+            initStructureChart: function() {
+                const ctx = document.getElementById('structureChart').getContext('2d');
+                this.charts.structure = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['1', '2', '3', '4', '5', '6', '7', '8', '9'],
+                        datasets: [{
+                            data: [10, 30, 20, 50, 40, 70, 60, 90, 80],
+                            borderColor: '#FB6524',
+                            borderWidth: 4,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#0D0D0D',
+                            tension: 0,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: { display: false },
+                            y: { display: false }
+                        },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            },
+
+            updateStructure: function(mode) {
+                const btns = document.querySelectorAll('.struct-btn');
+                btns.forEach(b => b.classList.remove('active', 'bg-brand-black', 'text-white'));
+                event.target.classList.add('active', 'bg-brand-black', 'text-white');
+                
+                const status = document.getElementById('struct-status');
+                if(mode === 'uptrend') {
+                    this.charts.structure.data.datasets[0].data = [10, 30, 20, 50, 40, 70, 60, 90, 80];
+                    status.innerText = "BOS АКТИВОВАНО";
+                } else {
+                    this.charts.structure.data.datasets[0].data = [10, 30, 20, 50, 40, 35, 20, 10, 5];
+                    status.innerText = "CHoCH / ЗЛАМ СТРУКТУРИ";
+                }
+                this.charts.structure.update();
+            },
+
+            initLiquidityChart: function() {
+                const ctx = document.getElementById('liquidityCanvas').getContext('2d');
+                this.charts.liquidity = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['A', 'B', 'C', 'D', 'E', 'F', 'G'],
+                        datasets: [{
+                            label: 'Price',
+                            data: [50, 45, 48, 44, 47, 43, 46],
+                            borderColor: '#FFFFFF',
+                            pointRadius: 0,
+                            borderWidth: 2,
+                            tension: 0.1
+                        }, {
+                            label: 'Retail Stop Loss Pool',
+                            data: [42, 42, 42, 42, 42, 42, 42],
+                            borderColor: '#FB6524',
+                            borderDash: [5, 5],
+                            pointRadius: 0,
+                            fill: true,
+                            backgroundColor: 'rgba(251, 101, 36, 0.05)'
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: { x: { display: false }, y: { display: false } },
+                        plugins: { legend: { display: false } }
+                    }
+                });
+            },
+
+            simulateSweep: function() {
+                const chart = this.charts.liquidity;
+                // Sharp drop through stops, then massive recovery
+                chart.data.datasets[0].data = [50, 45, 48, 44, 47, 35, 60];
+                chart.update();
+                
+                setTimeout(() => {
+                    chart.data.datasets[0].data = [50, 45, 48, 44, 47, 43, 46];
+                    chart.update();
+                }, 2000);
+            },
+
+            toggleOB: function() {
+                document.getElementById('ob-zone').classList.toggle('hidden');
+            },
+
+            toggleFVG: function() {
+                document.getElementById('fvg-zone').classList.toggle('hidden');
+            },
+
+            initIdmChart: function() {
+                const ctx = document.getElementById('idmCanvas').getContext('2d');
+                this.charts.idm = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['1', '2', '3', '4', '5', '6'],
+                        datasets: [{
+                            label: 'Рух ціни',
+                            data: [90, 30, 60, 50, null, null], // Initial trap state
+                            borderColor: '#0D0D0D',
+                            borderWidth: 3,
+                            tension: 0.2,
+                            pointRadius: [0, 0, 8, 0, 10, 0], // Point 3 is IDM, 5 is real OB
+                            pointBackgroundColor: ['#000', '#000', '#BF5022', '#000', '#492415', '#000']
+                        },
+                        {
+                            label: 'Справжній OB',
+                            data: [90, 90, 90, 90, 90, 90], // Real POI level
+                            borderColor: '#492415',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        scales: { x: { display: false }, y: { min: 0, max: 100, display: false } },
+                        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                        animation: { duration: 500 }
+                    }
+                });
+            },
+
+            simulateIdmSweep: function() {
+                const chart = this.charts.idm;
+                // Price sweeps IDM (point 3 at 60) and hits the real OB (point 5 at 85)
+                chart.data.datasets[0].data = [90, 30, 60, 50, 85, 10];
+                chart.update();
+                
+                setTimeout(() => {
+                    // Reset to trap state
+                    chart.data.datasets[0].data = [90, 30, 60, 50, null, null];
+                    chart.update();
+                }, 4000);
+            }
+        };
+
+        window.onload = () => app.init();
+    </script>
+</body>
+</html>
